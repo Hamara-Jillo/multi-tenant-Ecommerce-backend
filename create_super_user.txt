@@ -1,0 +1,1 @@
+python manage.py create_merchant_admin --name="Platform Admin" --schema="public" --domain="admin.localhost" --email="admin@platform.com" --password="admin123"

@@ -1,0 +1,11 @@
+python manage.py makemigrations address partner catalogue
+
+# 2. Dependent apps
+python manage.py makemigrations offer
+python manage.py makemigrations voucher
+python manage.py makemigrations order
+
+# 3. Remaining apps
+python manage.py makemigrations
+
+python manage.py migrate_schemas --shared

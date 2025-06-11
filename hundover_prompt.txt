@@ -1,0 +1,1 @@
+Write an ai prompt to hand over this conversation's context, progress and deliverables. Make it detailed and if needed would allow for context queries from the ai

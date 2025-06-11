@@ -1,0 +1,55 @@
+﻿Understanding the Issue
+When you rename the 'voucher' app and override its configuration, you're changing how Django identifies the app. Oscar, however, might still be referencing the app by its original name ('voucher'). This mismatch is the root cause of the LookupError.
+Specifically, Oscar's get_model() function, which is used in signals.py, tries to retrieve the Voucher model using the original app label ('voucher'). Django's app registry, after your renaming, no longer recognizes 'voucher' as a valid app label; it now knows it as 'store_voucher'.
+The Solution
+To fix this, you need to ensure that Oscar uses the correct app label ('store_voucher') when referencing the Voucher model. Here's the most robust way to do this:
+1. settings.py: In your settings.py, make sure both oscar.apps.voucher and your custom app are present, and that your custom app is correctly configured. It's crucial that your custom app's configuration overrides Oscar's.
+INSTALLED_APPS = [
+   'django.contrib.auth',
+   'django.contrib.contenttypes',
+   'django.contrib.sessions',
+   'django.contrib.sites',
+   'django.contrib.messages',
+   'django.contrib.staticfiles',
+   'django.contrib.admin',
+   'oscar.config.Shop',
+   # Oscar apps...
+   'oscar.apps.voucher',  # Keep this!
+   # ... other Oscar apps
+   'merchant_apps.store.voucher',  # Your custom app
+]
+
+OSCAR_MODEL_CLASSES = {
+   'voucher': 'merchant_apps.store.voucher.models.Voucher',  # Correct model path
+}
+
+   * Keep oscar.apps.voucher: It's important to keep the original oscar.apps.voucher in INSTALLED_APPS. Oscar's internal code relies on it.
+   * OSCAR_MODEL_CLASSES: This setting is the key to telling Oscar to use your custom Voucher model. Make sure the path is correct.
+   2. signals.py (If you have a custom signals.py): If you've created a custom signals.py in your merchant_apps.store.voucher app, ensure it uses oscar.apps.get_model and the original app label ('voucher') to get the Voucher model. Oscar will then use your swapped model.
+from oscar.core.loading import get_model
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+Voucher = get_model('voucher', 'Voucher')  # Use 'voucher' here
+
+@receiver(post_save, sender=Voucher)
+def voucher_post_save_handler(sender, instance, created, **kwargs):
+   # Your signal logic here
+   pass
+
+      * Use 'voucher' in get_model(): Even though your app is now 'store_voucher', Oscar's get_model() expects the original app label. The OSCAR_MODEL_CLASSES setting ensures that the correct model is retrieved.
+      3. voucher/apps.py: Your apps.py should look like this
+from oscar.apps.voucher.apps import VoucherConfig as CoreVoucherConfig
+from oscar.core.loading import get_model
+
+class VoucherConfig(CoreVoucherConfig):
+   name = 'merchant_apps.store.voucher'
+   label = 'store_voucher'  # This is your new app label
+   verbose_name = 'Store Voucher'
+   swappable = 'OSCAR_VOUCHER_MODEL'
+
+   def ready(self):
+       super().ready()
+       #  Import your signals here, if any, to avoid circular imports
+       #  For example:
+       #  from . import signals

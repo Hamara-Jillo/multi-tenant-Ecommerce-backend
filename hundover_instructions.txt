@@ -1,0 +1,101 @@
+AI Collaboration Prompt Template
+Subject: Technical Handoff for Debugging Assistance — Multi-Tenant E-Commerce Platform
+
+1. Problem Statement
+Current Issue:
+[Describe the specific error/blocker with technical details, including error messages, stack traces, and observed behavior. Example:]
+
+"After forking Oscar's voucher app into store_voucher, Django raises LookupError: Model 'voucher.Voucher' not registered during migrations. Full error log attached. Attempted fixes: adjusted apps.py, removed wildcard imports, regenerated migrations. Issue persists."
+
+2. Project Context
+Project Goal:
+[Briefly describe the overarching goal. Example:]
+
+"Build a multi-tenant e-commerce platform using Django Oscar and django-tenants, with per-tenant isolated data in PostgreSQL schemas."
+
+Tech Stack:
+
+Django 4.2, django-tenants, Django Oscar 3.x
+
+PostgreSQL, schema-based tenancy
+
+Forked Oscar apps: catalogue, offer, voucher (customized with store ForeignKey)
+
+Key Configurations:
+
+SHARED_APPS/TENANT_APPS split in settings.py
+
+Custom Voucher model in store_voucher/models.py inheriting from AbstractVoucher
+
+OSCAR_VOUCHER_MODEL = 'store_voucher.Voucher'
+
+Relevant Code Snippets:
+
+python
+Copy
+# settings.py (abbreviated)  
+INSTALLED_APPS = [  
+    'django_tenants',  
+    'merchant_apps.store.voucher.apps.VoucherConfig',  # Forked app  
+    # ...  
+]  
+OSCAR_VOUCHER_MODEL = 'store_voucher.Voucher'  
+python
+Copy
+# store_voucher/models.py (critical section)  
+from oscar.apps.voucher.abstract_models import AbstractVoucher  
+class Voucher(AbstractVoucher):  
+    store = models.ForeignKey('store_meta.Store', on_delete=models.CASCADE)  
+    class Meta(AbstractVoucher.Meta):  
+        app_label = 'store_voucher'  # Or 'voucher'?  
+3. Milestones
+Completed:
+
+Forked catalogue, offer apps successfully.
+
+Tenant-aware Order and Shipping models operational.
+
+Pending:
+
+Resolve store_voucher model registration conflict.
+
+Run migrations for all tenant schemas.
+
+4. AI Interaction Guidelines
+Areas Requiring Clarification (AI May Ask):
+
+App Structure:
+
+Directory layout of the forked store_voucher app.
+
+Exact apps.py configuration (e.g., label, name).
+
+Dependency Chain:
+
+How other apps (e.g., offer, order) reference the Voucher model.
+
+Use of get_model() vs. direct imports.
+
+Migration History:
+
+Are Oscar’s original migrations copied to the forked app?
+
+Steps taken to regenerate migrations (commands used).
+
+Error Logs:
+
+Full traceback of the LookupError.
+
+PostgreSQL logs during migrate_schemas.
+
+5. Request to AI
+Initial Task:
+Analyze the provided context and:
+
+Diagnose why voucher.Voucher is not registered despite forking.
+
+Provide step-by-step fixes for model registration and migrations.
+
+Permission to Ask Questions:
+
+"If critical details are missing (e.g., app configuration, model imports), the AI should list specific questions to unblock the analysis."

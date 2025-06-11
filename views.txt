@@ -1,0 +1,172 @@
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.shortcuts import get_object_or_404
+from django.http import Http404
+
+from .models import (
+    Shop, BrandingSettings, BusinessSettings, PaymentSettings,
+    ShippingZone, ShippingMethod, TaxSetting, Market, SEOSettings
+)
+from .serializers import (
+    ShopSerializer, BrandingSettingsSerializer, BusinessSettingsSerializer,
+    PaymentSettingsSerializer, ShippingZoneSerializer, ShippingMethodSerializer,
+    TaxSettingSerializer, MarketSerializer, SEOSettingsSerializer
+)
+
+class ShopContextMixin:
+    """Mixin to add current shop to the context."""
+    def get_shop(self):
+        """Get the current shop based on the logged-in merchant."""
+        if not self.request.user.is_authenticated:
+            raise Http404("No shop found")
+        try:
+            shop = Shop.objects.filter(merchant=self.request.user).order_by('-is_primary_store', 'name').first()
+            if not shop:
+                raise Http404("No shop found")
+            return shop
+        except Shop.DoesNotExist:
+            raise Http404("No shop found")
+
+class ShopDashboardAPIView(ShopContextMixin, APIView):
+    """API view for the shop dashboard."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        shop = self.get_shop()
+        serializer = ShopSerializer(shop)
+        return Response(serializer.data)
+
+class ShopSettingsAPIView(ShopContextMixin, UpdateAPIView):
+    """API view for updating general shop settings."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShopSerializer
+    
+    def get_object(self):
+        return self.get_shop()
+
+class BrandingSettingsAPIView(ShopContextMixin, UpdateAPIView):
+    """API view for updating shop branding settings."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = BrandingSettingsSerializer
+    
+    def get_object(self):
+        shop = self.get_shop()
+        obj, created = BrandingSettings.objects.get_or_create(shop=shop)
+        return obj
+
+class BusinessSettingsAPIView(ShopContextMixin, UpdateAPIView):
+    """API view for updating business operational settings."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = BusinessSettingsSerializer
+    
+    def get_object(self):
+        shop = self.get_shop()
+        obj, created = BusinessSettings.objects.get_or_create(shop=shop)
+        return obj
+
+class PaymentSettingsAPIView(ShopContextMixin, UpdateAPIView):
+    """API view for updating payment gateway settings."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = PaymentSettingsSerializer
+    
+    def get_object(self):
+        shop = self.get_shop()
+        obj, created = PaymentSettings.objects.get_or_create(shop=shop)
+        return obj
+
+class ShippingZonesAPIView(ShopContextMixin, ListCreateAPIView):
+    """API view for listing and creating shipping zones."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShippingZoneSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        return ShippingZone.objects.filter(shop=shop)
+    
+    def perform_create(self, serializer):
+        shop = self.get_shop()
+        serializer.save(shop=shop)
+
+class ShippingZoneDetailAPIView(ShopContextMixin, RetrieveUpdateDestroyAPIView):
+    """API view for managing a specific shipping zone."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShippingZoneSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        return ShippingZone.objects.filter(shop=shop)
+
+class ShippingMethodsAPIView(ShopContextMixin, ListCreateAPIView):
+    """API view for listing and creating shipping methods for a zone."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ShippingMethodSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        zone_id = self.kwargs.get('zone_id')
+        return ShippingMethod.objects.filter(shipping_zone__shop=shop, shipping_zone_id=zone_id)
+    
+    def perform_create(self, serializer):
+        zone = get_object_or_404(ShippingZone, id=self.kwargs.get('zone_id'), shop=self.get_shop())
+        serializer.save(shipping_zone=zone)
+
+class TaxSettingsAPIView(ShopContextMixin, ListCreateAPIView):
+    """API view for managing tax settings across regions."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = TaxSettingSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        return TaxSetting.objects.filter(shop=shop)
+    
+    def perform_create(self, serializer):
+        shop = self.get_shop()
+        serializer.save(shop=shop)
+
+class MarketsAPIView(ShopContextMixin, ListCreateAPIView):
+    """API view for listing and creating markets."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = MarketSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        return Market.objects.filter(shop=shop)
+    
+    def perform_create(self, serializer):
+        shop = self.get_shop()
+        serializer.save(shop=shop)
+
+class MarketDetailAPIView(ShopContextMixin, RetrieveUpdateDestroyAPIView):
+    """API view for managing a specific market."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = MarketSerializer
+    
+    def get_queryset(self):
+        shop = self.get_shop()
+        return Market.objects.filter(shop=shop)
+
+class SEOSettingsAPIView(ShopContextMixin, UpdateAPIView):
+    """API view for updating SEO and marketing settings."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SEOSettingsSerializer
+    
+    def get_object(self):
+        shop = self.get_shop()
+        obj, created = SEOSettings.objects.get_or_create(shop=shop)
+        return obj
