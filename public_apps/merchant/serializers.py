@@ -5,7 +5,7 @@ from django_tenants.utils import schema_context, get_tenant_model
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
-from public_apps.user.tokens import MerchantToken, get_tokens_for_user
+from public_apps.user.tokens import MerchantToken, TenantToken
 from .models import Merchant, Domain
 
 tenant = get_tenant_model()
@@ -120,7 +120,7 @@ class MerchantTokenObtainPairSerializer(serializers.Serializer):
         if tenant and getattr(user, 'schema_name', None) != getattr(tenant, 'schema_name', None):
             raise serializers.ValidationError("User does not belong to this tenant.")
 
-        tokens = get_tokens_for_user(user, token_class=MerchantToken)
+        tokens = TenantToken.get_tokens_for_user(user, token_class=MerchantToken)
         return {
             'refresh': tokens['refresh'],
             'access': tokens['access'],

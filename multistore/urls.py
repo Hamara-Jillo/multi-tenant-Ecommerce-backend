@@ -161,14 +161,14 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', views.obtain_auth_token),
     # API endpoints for merchants
-    path('accounts/', include('public_apps.merchant.urls')),
+    # path('accounts/', include('public_apps.merchant.urls')),
 
     # API endpoints for user operations
-    path('api/auth/', include('public_apps.user.urls')),
+    path('api/auth/', include('public_apps.auth.urls')),
     # # API endpoints for store operations
     path('store/', include('merchant_apps.store.meta.urls')),
     # API endpoints for Merchant operations
-    path('api/merchants/', include('public_apps.merchant.urls')),
+    # path('api/merchants/', include('public_apps.merchant.urls')),
 
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

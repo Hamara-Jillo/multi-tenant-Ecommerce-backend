@@ -4,8 +4,8 @@ from public_apps.merchant.models import Merchant
 from .models import User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'role', 'is_active')
-    list_filter = ('role', 'is_active')
+    list_display = ('email', 'is_platform_admin', 'is_staff', 'is_superuser')
+    list_filter = ('is_platform_admin', 'is_staff', 'is_superuser')
     search_fields = ('email',)
     
     def get_queryset(self, request):

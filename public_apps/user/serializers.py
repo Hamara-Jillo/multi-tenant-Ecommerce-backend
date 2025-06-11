@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django_tenants.utils import get_tenant_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from public_apps.user.tokens import CustomerToken, MerchantToken
+from public_apps.user.tokens import UserToken, MerchantToken
 
 User = get_user_model()
 
@@ -163,7 +163,7 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Either email or username must be provided")
         return attrs
     
-class CustomerRegistrationSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.ModelSerializer):
     """Serializer for customer registration"""
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -191,7 +191,7 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Custom token pair serializer for customers"""
     
     @classmethod
@@ -201,7 +201,7 @@ class CustomerTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "Invalid role for customer authentication"
             )
         
-        return CustomerToken.for_user(user)
+        return UserToken.for_user(user)
 
 
     

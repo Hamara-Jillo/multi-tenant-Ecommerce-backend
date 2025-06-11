@@ -51,6 +51,7 @@ SHARED_APPS = [
     'public_apps.merchant',
     'public_apps.user.apps.UserConfig',  # User app is only in TENANT_APPS
     'merchant_apps.store.meta.apps.StoreMetaConfig',  # Move to SHARED_APPS since it's needed by other shared apps
+    'public_apps.auth.apps.AuthConfig',  # Authentication app for JWT and OAuth
 
     'django.contrib.admin',
     'django.contrib.auth',
