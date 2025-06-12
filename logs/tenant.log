@@ -14673,3 +14673,508 @@ Level: DEBUG
 Module: admin
 Message: Platform admin sarah@platform.com granted access
 ------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:09:41
+Level: INFO
+Module: create_merchant_admin
+Message: Starting admin merchant creation...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:09:41
+Level: DEBUG
+Module: create_merchant_admin
+Message: Dropping existing schemas...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:09:41
+Level: INFO
+Module: create_merchant_admin
+Message: Applying migrations...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:10:00
+Level: DEBUG
+Module: create_merchant_admin
+Message: Creating merchant...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:10:00
+Level: DEBUG
+Module: models
+Message: Saving merchant Platform Admin
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:10:00
+Level: DEBUG
+Module: create_merchant_admin
+Message: Creating superuser...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:10:01
+Level: ERROR
+Module: create_merchant_admin
+Message: Error creating admin merchant: 'User' object has no attribute 'role'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:10:01
+Level: ERROR
+Module: create_merchant_admin
+Message: Full error details:
+------------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/multistore/public_apps/merchant/management/commands/create_merchant_admin.py", line 53, in handle
+    user = User.objects.create_superuser(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/multistore/public_apps/user/models.py", line 30, in create_superuser
+    return self.create_user(email, password, **extra_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/multistore/public_apps/user/models.py", line 19, in create_user
+    user.save(using=self._db)
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/sokoenv/lib/python3.12/site-packages/django/contrib/auth/base_user.py", line 67, in save
+    super().save(*args, **kwargs)
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/sokoenv/lib/python3.12/site-packages/django/db/models/base.py", line 726, in save
+    self.save_base(using=using, force_insert=force_insert,
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/sokoenv/lib/python3.12/site-packages/django/db/models/base.py", line 774, in save_base
+    post_save.send(
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/sokoenv/lib/python3.12/site-packages/django/dispatch/dispatcher.py", line 181, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hamara/Documents/Projects/Soko/ Multitentant-Ecommerce-System-Backend/multistore/merchant_apps/store/customer/models.py", line 14, in create_or_update_customer
+    if instance.role == 'store_customer':
+       ^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'role'
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:13
+Level: INFO
+Module: create_merchant_admin
+Message: Starting admin merchant creation...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:13
+Level: DEBUG
+Module: create_merchant_admin
+Message: Dropping existing schemas...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:13
+Level: INFO
+Module: create_merchant_admin
+Message: Applying migrations...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:33
+Level: DEBUG
+Module: create_merchant_admin
+Message: Creating merchant...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:33
+Level: DEBUG
+Module: models
+Message: Saving merchant Platform Admin
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 11:14:33
+Level: DEBUG
+Module: create_merchant_admin
+Message: Creating superuser...
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:06:30
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:06:55
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:06:55
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:12:51
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:13:15
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:13:16
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:14:10
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:14:37
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:14:37
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:42:25
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:42:59
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 13:42:59
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 14:24:36
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 14:25:08
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 14:25:09
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:01:14
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:01:44
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:01:45
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:02:47
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:03:16
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:03:17
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:06:23
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:06:51
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:06:52
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:20:08
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:20:51
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:20:52
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:30:59
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:31:28
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:31:28
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:33:03
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:33:35
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:33:36
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:38:02
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:38:32
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 15:38:33
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:25:24
+Level: DEBUG
+Module: models
+Message: Saving merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:25:47
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:25:47
+Level: INFO
+Module: models
+Message: Created admin user for Sarah Sales: sarah@platform.com
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:30:58
+Level: DEBUG
+Module: admin
+Message: Platform admin admin@platform.com attempting to delete merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:30:58
+Level: INFO
+Module: models
+Message: Initiating deletion of merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:30:58
+Level: INFO
+Module: models
+Message: Successfully deleted merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 20:30:58
+Level: INFO
+Module: admin
+Message: Successfully deleted merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:10:50
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:11:20
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:11:20
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com with temp password: gnAEgJUsex
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:13:40
+Level: DEBUG
+Module: models
+Message: Saving merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:14:09
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:14:09
+Level: INFO
+Module: models
+Message: Created admin user for acme: acme@platform.com with temp password: JZh394nsWu
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:14:09
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant acme
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:20:13
+Level: DEBUG
+Module: models
+Message: Saving merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:20:32
+Level: DEBUG
+Module: models
+Message: Creating admin user for merchant Sarah Sales
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:20:33
+Level: INFO
+Module: models
+Message: Created admin user for Sarah Sales: sarah@platform.com with temp password: Xgtp6hXHLA
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:22:50
+Level: DEBUG
+Module: admin
+Message: Platform admin sarah@platform.com granted access
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Time: 2025-06-12 22:22:50
+Level: DEBUG
+Module: admin
+Message: Platform admin sarah@platform.com granted access
+------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 
+from public_apps.merchant.models import Merchant
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -31,6 +33,16 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('merchant_admin', 'Merchant Admin'),
+        ('store_manager', 'Store Manager'),
+        ('store_staff', 'Store Staff'),
+        ('accountant', 'Accountant'),
+        ('customer_service', 'Customer Service'),
+        ('store_customer', 'Store Customer'),
+        ('public_admin', 'Platform Admin'),
+    ]
+    role = models.CharField(max_length=32, choices=ROLE_CHOICES, default='store_customer')
     username = models.CharField(max_length=150, unique=True, null=True)
     email = models.EmailField(unique=True)
     is_platform_admin = models.BooleanField(default=False)
@@ -79,7 +91,7 @@ class User(AbstractUser):
 
     def get_accessible_tenants(self):
         """Get all tenants the user has access to"""
-        return self.tenant_memberships.filter(tenantmembership__is_active=True).distinct()
+        return Merchant.objects.filter(memberships__user=self, memberships__is_active=True).distinct()
 
     def is_merchant_admin(self):
         """Check if the user is a merchant admin in any tenant"""

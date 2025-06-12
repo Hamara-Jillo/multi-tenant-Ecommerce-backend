@@ -6,8 +6,9 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from datetime import timedelta
 import secrets
+from django.db import IntegrityError, transaction
 
-from public_apps.merchant.models import Merchant, TenantMembership, TenantInvitation
+from public_apps.merchant.models import Domain, Merchant, TenantMembership, TenantInvitation
 from public_apps.user.tokens import TenantToken
 
 User = get_user_model()
@@ -31,7 +32,7 @@ class UnifiedAuthenticationSerializer(TokenObtainPairSerializer):
             raise serializers.ValidationError('User account is disabled')
         
         # Get active tenant memberships
-        memberships = user.tenantmembership_set.filter(is_active=True).select_related('tenant')
+        memberships = user.memberships.filter(is_active=True).select_related('tenant')
         
         if not memberships.exists():
             raise serializers.ValidationError('User has no active tenant access')
@@ -91,7 +92,7 @@ class TenantSelectionSerializer(serializers.Serializer):
         user = self.context['request'].user
         
         try:
-            membership = user.tenantmembership_set.get(
+            membership = user.memberships.get(
                 tenant_id=value,
                 is_active=True
             )
@@ -103,7 +104,7 @@ class TenantSelectionSerializer(serializers.Serializer):
         user = self.context['request'].user
         tenant_id = validated_data['tenant_id']
         
-        membership = user.tenantmembership_set.get(
+        membership = user.memberships.get(
             tenant_id=tenant_id,
             is_active=True
         )
@@ -163,51 +164,67 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-class MerchantCreationSerializer(serializers.ModelSerializer):
-    """
-    Create merchant/tenant with user assignment
-    """
-    user_data = UserRegistrationSerializer(required=False)
+# class MerchantCreationSerializer(serializers.ModelSerializer):
+#     """
+#     Create merchant/tenant with user assignment
+#     """
+#     user_data = UserRegistrationSerializer(required=False)
     
-    class Meta:
-        model = Merchant
-        fields = [
-            'name', 'contact_email', 'contact_phone', 'timezone', 
-            'default_language', 'business_type', 'user_data'
-        ]
+#     class Meta:
+#         model = Merchant
+#         fields = [
+#             'name', 'contact_email', 'contact_phone', 'timezone', 
+#             'default_language', 'business_type', 'user_data'
+#         ]
     
-    def create(self, validated_data):
-        user_data = validated_data.pop('user_data', None)
-        request = self.context['request']
-        
-        # Get or create user
-        if request.user.is_authenticated:
-            user = request.user
-        elif user_data:
-            user_serializer = UserRegistrationSerializer(data=user_data)
-            user_serializer.is_valid(raise_exception=True)
-            user = user_serializer.save()
-        else:
-            raise serializers.ValidationError("User data required for unauthenticated requests")
-        
-        # Create merchant
-        merchant = Merchant.objects.create(**validated_data)
-        
-        # Create owner membership
-        TenantMembership.objects.create(
-            user=user,
-            tenant=merchant,
-            role='merchant_admin',
-            is_owner=True,
-            is_active=True
-        )
-        
-        # Set as primary tenant
-        if not user.primary_tenant:
-            user.primary_tenant = merchant
-            user.save()
-        
-        return merchant
+#     def create(self, validated_data):
+#         user_data = validated_data.pop('user_data', None)
+#         domains_data = validated_data.pop('domains', [])
+#         request = self.context['request']
+
+#         # Get or create user
+#         if request.user.is_authenticated:
+#             user = request.user
+#         elif user_data:
+#             user_serializer = UserRegistrationSerializer(data=user_data)
+#             user_serializer.is_valid(raise_exception=True)
+#             user = user_serializer.save()
+#         else:
+#             raise serializers.ValidationError("User data required for unauthenticated requests")
+
+#         # Auto-generate schema_name if not provided
+#         if 'schema_name' not in validated_data:
+#             validated_data['schema_name'] = self._generate_schema_name(validated_data['name'])
+
+#         try:
+#             with transaction.atomic():
+#                 # Create merchant
+#                 merchant = Merchant.objects.create(**validated_data)
+
+#                 # Create domains if provided
+#                 for domain_data in domains_data:
+#                     Domain.objects.create(tenant=merchant, **domain_data)
+
+#                 # Create TenantMembership for the user
+#                 TenantMembership.objects.create(
+#                     user=user,
+#                     tenant=merchant,
+#                     role='merchant_admin',
+#                     is_owner=True,
+#                     is_active=True
+#                 )
+
+#                 # Set as primary tenant if user has no primary tenant
+#                 if not user.primary_tenant:
+#                     user.primary_tenant = merchant
+#                     user.save()
+
+#         except IntegrityError as e:
+#             if 'unique constraint' in str(e):
+#                 raise serializers.ValidationError("Merchant with this schema_name already exists.")
+#             raise
+
+#         return merchant  # <-- Only return the model instance!
 
 
 class TenantInvitationSerializer(serializers.ModelSerializer):
@@ -313,3 +330,175 @@ class InvitationAcceptanceSerializer(serializers.Serializer):
             'membership': membership,
             'tenant': invitation.tenant
         }
+    
+class SocialAuthSerializer(serializers.Serializer):
+    """
+    Handle social authentication
+    """
+    email = serializers.EmailField()
+    provider = serializers.CharField(max_length=50)
+    provider_id = serializers.CharField(max_length=100)
+    first_name = serializers.CharField(max_length=30, required=False)
+    last_name = serializers.CharField(max_length=30, required=False)
+    avatar_url = serializers.URLField(required=False)
+    
+    def create(self, validated_data):
+        email = validated_data['email']
+        
+        # Get or create user
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                'provider': validated_data['provider'],
+                'provider_id': validated_data['provider_id'],
+                'first_name': validated_data.get('first_name', ''),
+                'last_name': validated_data.get('last_name', ''),
+                'avatar_url': validated_data.get('avatar_url'),
+                'username': email.split('@')[0],
+            }
+        )
+        
+        if created:
+            user.set_unusable_password()
+            user.save()
+        
+        # Get active tenant memberships
+        memberships = user.memberships.filter(is_active=True).select_related('tenant')
+        
+        # Prepare response data
+        data = {
+            'user_id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'is_new_user': created
+        }
+        
+        if not memberships.exists():
+            # User has no tenant access - they need to join or create one
+            data['requires_onboarding'] = True
+            data['message'] = 'Welcome! You can join an existing merchant or create your own.'
+        elif memberships.count() > 1:
+            # Multi-tenant scenario
+            data['requires_tenant_selection'] = True
+            data['available_tenants'] = [
+                {
+                    'id': membership.tenant.id,
+                    'name': membership.tenant.name,
+                    'domain': membership.tenant.domain_url,
+                    'role': membership.role,
+                    'is_primary': user.primary_tenant_id == membership.tenant.id
+                }
+                for membership in memberships
+            ]
+        else:
+            # Single tenant - generate tokens immediately
+            membership = memberships.first()
+            tenant = membership.tenant
+            
+            token = TenantToken.for_user_and_tenant(user, tenant)
+            
+            data.update({
+                'access': str(token.access_token),
+                'refresh': str(token),
+                'tenant': {
+                    'id': tenant.id,
+                    'name': tenant.name,
+                    'domain': tenant.domain_url,
+                    'schema_name': tenant.schema_name,
+                    'role': membership.role
+                },
+                'redirect_url': f"https://{tenant.domain_url}/dashboard/"
+            })
+        
+        return data
+
+
+# Enhanced MerchantCreationSerializer
+class DomainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ['domain', 'is_primary', 'ssl_enabled']
+
+class MerchantCreationSerializer(serializers.ModelSerializer):
+    user_data = UserRegistrationSerializer(required=False)
+    domains = DomainSerializer(many=True, required=False)
+
+    class Meta:
+        model = Merchant
+        fields = [
+            'name', 'contact_email', 'contact_phone', 'timezone', 
+            'default_language', 'business_type', 'user_data', 'domains'
+        ]
+        extra_kwargs = {
+            'schema_name': {'required': False}
+        }
+
+    def validate_schema_name(self, value):
+        """Ensure schema name follows PostgreSQL naming rules"""
+        if not value.replace('_', '').isalnum():
+            raise serializers.ValidationError(
+                "Schema name can only contain alphanumerics and underscores"
+            )
+        return value.lower()
+
+    def _generate_schema_name(self, name):
+        """Generate a unique schema name based on the merchant name"""
+        base_name = name.lower().replace(' ', '_')
+        schema_name = base_name
+        counter = 0
+        original_schema = schema_name
+        while Merchant.objects.filter(schema_name=schema_name).exists():
+            counter += 1
+            schema_name = f"{original_schema}_{counter}"
+        return schema_name
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user_data', None)
+        domains_data = validated_data.pop('domains', [])
+        request = self.context['request']
+
+        # Get or create user
+        if request.user.is_authenticated:
+            user = request.user
+        elif user_data:
+            user_serializer = UserRegistrationSerializer(data=user_data)
+            user_serializer.is_valid(raise_exception=True)
+            user = user_serializer.save()
+        else:
+            raise serializers.ValidationError("User data required for unauthenticated requests")
+
+        # Auto-generate schema_name if not provided
+        if 'schema_name' not in validated_data:
+            validated_data['schema_name'] = self._generate_schema_name(validated_data['name'])
+
+        try:
+            with transaction.atomic():
+                # Create merchant
+                merchant = Merchant.objects.create(**validated_data)
+                merchant._create_admin_user()  # Ensure admin user is created
+                
+                # Create domains if provided
+                # for domain_data in domains_data:
+                #     Domain.objects.create(tenant=merchant, **domain_data)
+
+                # Create TenantMembership for the user
+                TenantMembership.objects.create(
+                    user=user,
+                    tenant=merchant,
+                    role='merchant_admin',
+                    is_owner=True,
+                    is_active=True
+                )
+
+                # Set as primary tenant if user has no primary tenant
+                if not user.primary_tenant:
+                    user.primary_tenant = merchant
+                    user.save()
+
+        except IntegrityError as e:
+            if 'unique constraint' in str(e):
+                raise serializers.ValidationError("Merchant with this schema_name already exists.")
+            raise
+
+        return merchant  

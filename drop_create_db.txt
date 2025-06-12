@@ -1,0 +1,34 @@
+sudo -i -u postgres psql                       
+[sudo] password for hamara: 
+psql (17.0 (Debian 17.0-1+b2))
+Type "help" for help.
+
+postgres=# \l
+                                                  List of databases
+    Name    |  Owner   | Encoding | Locale Provider | Collate |  Ctype  | Locale | ICU Rules |   Access privileges   
+------------+----------+----------+-----------------+---------+---------+--------+-----------+-----------------------
+ multistore | admin    | UTF8     | libc            | C.UTF-8 | C.UTF-8 |        |           | 
+ postgres   | postgres | UTF8     | libc            | C.UTF-8 | C.UTF-8 |        |           | 
+ template0  | postgres | UTF8     | libc            | C.UTF-8 | C.UTF-8 |        |           | =c/postgres          +
+            |          |          |                 |         |         |        |           | postgres=CTc/postgres
+ template1  | postgres | UTF8     | libc            | C.UTF-8 | C.UTF-8 |        |           | =c/postgres          +
+            |          |          |                 |         |         |        |           | postgres=CTc/postgres
+(4 rows)
+
+postgres=# DROP DATABASE multistore;
+ERROR:  database "multistore" is being accessed by other users
+DETAIL:  There is 1 other session using the database.
+postgres=# DROP DATABASE multistore;
+DROP DATABASE
+postgres=# CREATE DATABASE multistore;
+CREATE DATABASE
+postgres=# GRANT ALL PRIVILEGES ON SCHEMA public TO admin;
+ALTER SCHEMA public OWNER TO admin;
+GRANT ALL PRIVILEGES ON DATABASE multistore TO admin;
+ALTER DATABASE multistore OWNER TO admin;
+GRANT
+ALTER SCHEMA
+GRANT
+ALTER DATABASE
+postgres=# 
+

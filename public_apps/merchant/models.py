@@ -226,7 +226,7 @@ class Merchant(TenantMixin):
                 is_superuser=True,
                 role='merchant_admin'
             )
-            logger.info("Created admin user for %s: %s", self.name, admin_user.email)
+            logger.info("Created admin user for %s: %s with temp password: %s", self.name, admin_user.email, temp_password)
             return admin_user, temp_password
 
     def save(self, *args, **kwargs):

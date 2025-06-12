@@ -12,28 +12,18 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class TenantAwareTokenMixin:
-    """
-    Enhanced mixin for tenant-aware tokens
-    """
     @classmethod
     def for_user_and_tenant(cls, user, tenant):
-        """
-        Create token for specific user and tenant combination
-        """
         token = cls()
-        
-        # Standard user info
         token.payload.update({
             'user_id': user.id,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
         })
-        
-        # Tenant-specific info
         if tenant:
             try:
-                membership = user.tenantmembership_set.get(tenant=tenant, is_active=True)
+                membership = user.memberships.get(tenant=tenant, is_active=True)  # Fix here
                 token.payload.update({
                     'tenant_id': tenant.id,
                     'tenant_schema': tenant.schema_name,
@@ -45,7 +35,6 @@ class TenantAwareTokenMixin:
                 })
             except Exception as e:
                 logger.warning(f"Could not get membership for user {user.id} in tenant {tenant.id}: {e}")
-        
         return token
     
     @classmethod
